@@ -1,0 +1,15 @@
+{
+  "arch": "x86",
+  "data-layout": "e-m:e-p:32:32-f64:32:64-f80:32-n8:16:32-S128",
+  "disable-redzone": true,
+  "executables": true,
+  "linker": "ld",
+  "linker-flavor": "ld",
+  "llvm-target": "i386-unknown-none",
+  "os": "none",
+  "panic-strategy": "abort",
+  "relocation-model": "static",
+  "target-c-int-width": "32",
+  "target-endian": "little",
+  "target-pointer-width": "32"
+}
