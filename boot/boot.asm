@@ -1,4 +1,4 @@
-s[BITS 32]
+[BITS 32]
 
 MBALIGN  equ 1 << 0
 MEMINFO  equ 1 << 1

@@ -1,0 +1,29 @@
+---
+description: Documenter toute commande (setup, deps, build, test) dans INSTALL.md, BUILD.md, DEBUG.md ; pas de commande cachée
+alwaysApply: true
+---
+
+# Journalisation des commandes
+
+## Fichiers de documentation
+
+- **INSTALL.md** : installation, dépendances
+- **BUILD.md** : compilation
+- **DEBUG.md** : exécution, débogage
+
+## Structure à respecter
+
+- **INSTALL.md** : sections `# Installation`, `# Dependencies`
+- **BUILD.md** : section `# Build`
+- **DEBUG.md** : sections `# Run`, `# Debug`
+
+## Comportement obligatoire
+
+1. **Chaque commande** exécutée pour setup, dépendances, compilation ou tests **doit être documentée** dans le fichier correspondant.
+2. **Format** : ajouter en Markdown la commande et une courte explication (une ligne).
+3. **Pas de doublon** : ne pas réécrire une commande déjà présente dans le fichier.
+4. **Pas de commande cachée** : ne pas exécuter de commande sans la documenter ; toute commande lancée doit apparaître dans INSTALL.md, BUILD.md ou DEBUG.md.
+
+## Exemple (BUILD.md)
+
+Après avoir exécuté `make kernel.bin`, ajouter dans BUILD.md la section Build avec la commande en bloc bash et une ligne d’explication (ex. « Compiler le noyau → kernel.bin »).

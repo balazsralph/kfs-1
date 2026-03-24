@@ -6,7 +6,7 @@ ISO         := kfs.iso
 ASM         := nasm
 LD          := ld
 CARGO       := cargo +nightly
-GRUB_MK     := grub-mkrescue
+GRUB_MK     := $(or $(shell command -v grub2-mkrescue 2>/dev/null),$(shell command -v grub-mkrescue 2>/dev/null),grub-mkrescue)
 
 BOOT_DIR    := boot
 GRUB_DIR    := grub
@@ -21,7 +21,7 @@ $(BOOT_DIR)/boot.o: $(BOOT_DIR)/boot.asm
 	$(ASM) -f elf32 $< -o $@
 
 $(TARGET_DIR)/libkfs.a: Cargo.toml src/lib.rs src/kernel.rs $(TARGET)
-	$(CARGO) build -Z build-std=core --release --target $(TARGET)
+	$(CARGO) build -Z build-std=core -Z json-target-spec --release --target $(TARGET)
 
 $(KERNEL): $(BOOT_DIR)/boot.o $(TARGET_DIR)/libkfs.a linker.ld
 	$(LD) -m elf_i386 -T linker.ld -o $@ $(BOOT_DIR)/boot.o $(TARGET_DIR)/libkfs.a
@@ -32,10 +32,13 @@ $(ISO): $(KERNEL) $(GRUB_DIR)/grub.cfg
 	cp $(GRUB_DIR)/grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
 	$(GRUB_MK) -o $@ $(ISO_DIR)
 
+re: clean all run
+
 clean:
 	$(CARGO) clean
 	rm -f $(BOOT_DIR)/boot.o $(KERNEL) $(ISO)
 	rm -rf $(ISO_DIR)
 
 run: $(ISO)
-	qemu-system-i386 -cdrom $(ISO)
+	qemu-system-i386 -cdrom $(ISO) --enable-kvm --monitor stdio
+# 	-s -S

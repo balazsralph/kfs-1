@@ -1,0 +1,51 @@
+---
+description: Contraintes du noyau i386 freestanding (GRUB multiboot, pas de stdlib, structure et flags imposés)
+alwaysApply: true
+---
+
+# Règles du projet noyau (kfs)
+
+## Architecture et boot
+
+- **Cible** : i386 uniquement.
+- **Bootloader** : GRUB multiboot (header multiboot conforme).
+- **Point d’entrée noyau** : `kmain` (appelé depuis le bootloader).
+- **Boot** : préférer l’ASM pour le code de boot (header multiboot, stack, appel à `kmain`).
+- **Taille max du kernel** : 10 Mo.
+
+## Langages et binaires
+
+- **Langages autorisés** : ASM, C, Rust.
+- **Noyau** : obligatoirement freestanding (`kernel_must_be_freestanding: true`).
+- **Interdictions** : pas de stdlib, pas de bibliothèques hôte.
+- **Lien** : un script linker est requis (ex. `linker/linker.ld`).
+
+## Flags compilateur (à respecter)
+
+```
+-ffreestanding
+-fno-builtin
+-fno-stack-protector
+-nostdlib
+-nodefaultlibs
+```
+
+À utiliser pour la compilation du kernel (C/Rust) ; l’ASM suit les conventions du script linker (elf32, point d’entrée boot).
+
+## Structure du projet (obligatoire)
+
+```
+boot/      # Code de boot (ASM)
+kernel/    # Code du noyau (C/Rust)
+include/   # Headers partagés
+linker/    # Script linker (ex. linker.ld)
+iso/       # Génération de l’image ISO bootable
+```
+
+Respecter ces répertoires ; le Makefile doit compiler boot → kernel → link (avec script) → iso.
+
+## Exemples rapides
+
+- **Boot (ASM)** : section multiboot (magic, flags, checksum), stack en `.bss`, `extern kmain` puis `call kmain`.
+- **Kernel** : pas de `std::`, pas de `libc` ; implémenter soi-même strlen, memcpy, etc. si besoin.
+- **Lien** : `ld -T linker/linker.ld -o kernel.bin boot.o kernel.o ...` avec entrée = symbole du boot (ex. `start`).

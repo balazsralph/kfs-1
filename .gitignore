@@ -1,0 +1,20 @@
+# Build
+kernel.bin
+*.o
+boot/*.o
+iso/
+*.iso
+
+# Rust/Cargo
+target/
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
