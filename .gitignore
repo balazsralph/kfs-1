@@ -1,12 +1,10 @@
 # Build
+build/
 kernel.bin
 *.o
 boot/*.o
 iso/
 *.iso
-
-# Rust/Cargo
-target/
 
 # Editor / IDE
 *.swp
