@@ -3,7 +3,6 @@
 
 #include "console.h"
 #include "vga.h"
-#include "vga_cursor.h"
 
 #define CONSOLE_COUNT 2
 #define VGA_CELLS     (80U * 25U)
@@ -29,6 +28,4 @@ void console_switch(int id)
     vga_screen_copy_in(snapshots[id]);
     vga_set_row_col(rows[id], cols[id]);
     active_console = id;
-
-    vga_update_cursor((size_t)vga_get_row(), (size_t)vga_get_col());
 }

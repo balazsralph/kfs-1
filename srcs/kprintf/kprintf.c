@@ -10,10 +10,20 @@ static void putstr_internal(const char *s);
 static void putnbr_internal(int n);
 static void putunbr_internal(unsigned int n);
 static void puthex_internal(unsigned int n);
+static void putptr_internal(void *p);
 
 static void putchar_internal(char c)
 {
     char str[2];
+
+    if ((unsigned char)c == 127U) {
+        vga_delete_forward();
+        return;
+    }
+    if (c == '\b') {
+        vga_delete_backward();
+        return;
+    }
 
     str[0] = c;
     str[1] = '\0';
@@ -42,6 +52,15 @@ static void putunbr_internal(unsigned int n)
 static void puthex_internal(unsigned int n)
 {
     vga_print_hex(n);
+}
+
+static void putptr_internal(void *p)
+{
+    uintptr_t u;
+
+    vga_print_string("0x");
+    u = (uintptr_t)p;
+    vga_print_hex((unsigned int)u);
 }
 
 void kprintf(const char *format, ...)
@@ -80,6 +99,8 @@ void kprintf(const char *format, ...)
             putunbr_internal(va_arg(args, unsigned int));
         } else if (format[i] == 'x') {
             puthex_internal(va_arg(args, unsigned int));
+        } else if (format[i] == 'p') {
+            putptr_internal(va_arg(args, void *));
         } else {
             putchar_internal('%');
             putchar_internal(format[i]);

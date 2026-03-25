@@ -9,14 +9,14 @@ typedef struct vga_screen {
     uint32_t height;
     uint32_t row;
     uint32_t col;
-} vga_screen_t;
+}               vga_screen_t;
 
 typedef struct vga_color {
     uint8_t foreground;
     uint8_t background;
     uint8_t blink;
     uint8_t attrib;
-} vga_color_t;
+}               vga_color_t;
 
 void vga_init(uint32_t video_address);
 void vga_set_color(uint8_t foreground, uint8_t background, uint8_t blink);
@@ -32,5 +32,11 @@ uint32_t vga_get_col(void);
 void vga_screen_copy_out(uint16_t *dst);
 void vga_screen_copy_in(const uint16_t *src);
 void vga_set_row_col(uint32_t row, uint32_t col);
+
+void vga_cursor_move_left(void);
+void vga_cursor_move_right(void);
+
+void vga_delete_forward(void);
+void vga_delete_backward(void);
 
 #endif

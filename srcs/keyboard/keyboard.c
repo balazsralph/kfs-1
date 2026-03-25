@@ -1,9 +1,17 @@
+#include <stddef.h>
 #include <stdint.h>
 
 #include "keyboard.h"
 
 #define PS2_DATA    0x60U
 #define PS2_STATUS  0x64U
+
+#define SC_EXT_DELETE       0x53U
+#define SC_EXT_DELETE_SET2  0x71U
+#define SC_EXT_LEFT         0x4BU
+#define SC_EXT_RIGHT        0x4DU
+#define SC_EXT_LEFT_SET2    0x6BU
+#define SC_EXT_RIGHT_SET2   0x74U
 
 static inline uint8_t inb(uint16_t port)
 {
@@ -13,7 +21,6 @@ static inline uint8_t inb(uint16_t port)
     return value;
 }
 
-/* Scan code set 1 — touches pressées (make), US QWERTY, sans Shift */
 static const char scancode_map[128] = {
     [0x01] = 0,
     [0x02] = '1',
@@ -69,6 +76,55 @@ static const char scancode_map[128] = {
     [0x39] = ' ',
 };
 
+static const char shift_num[10] = {
+    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')'
+};
+
+static char apply_shift_caps(uint8_t sc, char c, uint8_t shift, uint8_t caps)
+{
+    if (c >= 'a' && c <= 'z') {
+        if ((caps ^ shift) != 0U) {
+            c = (char)(c - 32);
+        }
+        return c;
+    }
+
+    if (shift == 0U) {
+        return c;
+    }
+
+    if (sc >= 0x02U && sc <= 0x0BU) {
+        return shift_num[(size_t)(sc - 0x02U)];
+    }
+
+    switch (sc) {
+    case 0x0CU:
+        return '_';
+    case 0x0DU:
+        return '+';
+    case 0x1AU:
+        return '{';
+    case 0x1BU:
+        return '}';
+    case 0x27U:
+        return ':';
+    case 0x28U:
+        return '"';
+    case 0x29U:
+        return '~';
+    case 0x2BU:
+        return '|';
+    case 0x33U:
+        return '<';
+    case 0x34U:
+        return '>';
+    case 0x35U:
+        return '?';
+    default:
+        return c;
+    }
+}
+
 void keyboard_init(void)
 {
     while ((inb(PS2_STATUS) & 1U) != 0U) {
@@ -76,17 +132,23 @@ void keyboard_init(void)
     }
 }
 
-static void drain_extended(void)
+static uint8_t keyboard_read_data(void)
 {
     while ((inb(PS2_STATUS) & 1U) == 0U) {
         __asm__ volatile("pause" ::: "memory");
     }
-    (void)inb(PS2_DATA);
+    return inb(PS2_DATA);
 }
 
 char keyboard_getchar(void)
 {
+    static uint8_t shift_l;
+    static uint8_t shift_r;
+    static uint8_t caps;
+
     uint8_t sc;
+    uint8_t shift;
+    char    c;
 
     if ((inb(PS2_STATUS) & 1U) == 0U) {
         return 0;
@@ -95,27 +157,66 @@ char keyboard_getchar(void)
     sc = inb(PS2_DATA);
 
     if (sc == 0xE0U) {
-        drain_extended();
+        uint8_t sc2;
+
+        sc2 = keyboard_read_data();
+        if ((sc2 & 0x80U) != 0U) {
+            return 0;
+        }
+        if (sc2 == SC_EXT_DELETE || sc2 == SC_EXT_DELETE_SET2) {
+            return (char)127;
+        }
+        if (sc2 == SC_EXT_LEFT || sc2 == SC_EXT_LEFT_SET2) {
+            return (char)(unsigned char)KBD_ARROW_LEFT;
+        }
+        if (sc2 == SC_EXT_RIGHT || sc2 == SC_EXT_RIGHT_SET2) {
+            return (char)(unsigned char)KBD_ARROW_RIGHT;
+        }
         return 0;
     }
 
     if (sc == 0xE1U) {
         unsigned int i;
 
-        /* Pause : 5 octets supplémentaires */
         for (i = 0U; i < 5U; i++) {
-            drain_extended();
+            (void)keyboard_read_data();
         }
         return 0;
     }
 
     if ((sc & 0x80U) != 0U) {
+        sc = (uint8_t)(sc & 0x7FU);
+        if (sc == 0x2AU) {
+            shift_l = 0U;
+        } else if (sc == 0x36U) {
+            shift_r = 0U;
+        }
         return 0;
     }
 
-    if (sc < 128U) {
-        return scancode_map[sc];
+    if (sc == 0x2AU) {
+        shift_l = 1U;
+        return 0;
+    }
+    if (sc == 0x36U) {
+        shift_r = 1U;
+        return 0;
+    }
+    if (sc == 0x3AU) {
+        caps = (uint8_t)(caps ^ 1U);
+        return 0;
     }
 
-    return 0;
+    shift = (shift_l | shift_r) ? 1U : 0U;
+
+    if (sc >= 128U) {
+        return 0;
+    }
+
+    c = scancode_map[sc];
+    if (c == 0) {
+        return 0;
+    }
+
+    return apply_shift_caps(sc, c, shift, caps);
 }

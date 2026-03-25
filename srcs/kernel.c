@@ -27,32 +27,42 @@ void kernel_main(uint32_t magic, uint32_t info)
     vga_init(VGA_TEXT_BUFFER);
     keyboard_init();
 
-    char *msg = "              :::      ::::::::   \n"
+    char *msg = 
+                "                                 \n"
+                "              :::      ::::::::   \n"
                 "            :+:      :+:    :+:   \n"
                 "          +:+ +:+         +:+     \n"
                 "        +#+  +:+       +#+        \n"
                 "      +#+#+#+#+#+   +#+           \n"
                 "          #+#    #+#             \n"
-                "         ###   ########.fr       \n";
+                "         ###   ########.fr       \n"
+                "                                 \n";
     vga_clear_screen();
     vga_enable_cursor();
 
     vga_print_string(msg);
     vga_print_string("Hello, World!\n");
-    kprintf("Hello, World! %d %x\n", 42, 42);
+    kprintf("Hello, World! %d %x ptr=%p\n", 42, 42, (void *)msg);
+
+    
 
     while (1) {
         char c;
 
-        vga_update_cursor((size_t)vga_get_row(), (size_t)vga_get_col());
         c = keyboard_getchar();
         if (c != 0) {
             if (c == '1') {
                 console_switch(0);
             } else if (c == '2') {
                 console_switch(1);
+            } else if ((unsigned char)c == KBD_ARROW_LEFT) {
+                vga_cursor_move_left();
+            } else if ((unsigned char)c == KBD_ARROW_RIGHT) {
+                vga_cursor_move_right();
+            } else if ((unsigned char)c == 127U) {
+                vga_delete_forward();
             } else {
-                kprintf("Key pressed: %c\n", c);
+                kprintf("%c", c);
             }
         }
         cpu_sleep();

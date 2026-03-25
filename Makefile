@@ -73,4 +73,4 @@ clean:
 	rm -f $(KERNEL) $(ISO)
 
 run: $(ISO)
-	qemu-system-i386 -cdrom $(ISO) --enable-kvm --monitor stdio
+	qemu-system-i386 -cdrom $(ISO) --enable-kvm --monitor stdio -s

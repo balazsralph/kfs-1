@@ -207,3 +207,36 @@ bit:   7     6   5   4     3   2   1   0
 | Jaune       | 14   |
 | Blanc       | 15   |
 
+------DEBUG----------
+
+(qemu) info registers
+(qemu) info cpus
+(qemu) xp /16x 0x100000
+(qemu) xp /32bx 0xb8000
+(qemu) xp /32cb 0xb8000
+(qemu) xp /80cb 0xb8640
+(qemu) xp /16bx 0xb8640
+
+(qemu) xp /10x 0x1000
+0000000000001000: 0x0905c689 0xff000000 0x48868de0 0x89000000
+0000000000001010: 0x00004086 0xb0868d00 0x89000000 0x00003286
+0000000000001020: 0x96010f00 0x00000030
+(qemu) stop
+(qemu) cont
+
+(qemu) system_reset
+```bash
+qemu-system-i386 -cdrom kfs.iso -s -S
+🔹 options :
+-S → CPU bloqué au démarrage
+-s → ouvre un serveur GDB sur localhost:1234
+```
+
+```bash
+gdb
+(gdb) target remote localhost:1234
+
+
+(gdb) break kernel_main
+(gdb) continue
+```
