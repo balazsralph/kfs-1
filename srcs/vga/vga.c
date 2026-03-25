@@ -137,12 +137,14 @@ static void vga_putchar(char c)
         return;
     }
 
+    /* Enter Button */
     if (c == '\r') {
         g_vga.col = 0U;
         vga_cursor_sync();
         return;
     }
 
+    /* TAB Button */
     if (c == '\t') {
         size_t spaces;
         size_t i;
@@ -154,16 +156,18 @@ static void vga_putchar(char c)
         return;
     }
 
+    /* Backspace Button */
     if (c == '\b') {
         vga_delete_backward();
         return;
     }
 
+    /* DEL Button */
     if ((unsigned char)c == 127U) {
         vga_delete_forward();
         return;
     }
-
+    
     if (g_vga.row >= g_vga.height) {
         vga_scroll();
         g_vga.row = g_vga.height - 1U;
