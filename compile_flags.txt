@@ -1,0 +1,12 @@
+-m32
+-ffreestanding
+-fno-builtin
+-fno-stack-protector
+-fno-pie
+-Wall
+-Wextra
+-std=c11
+-Isrcs/console
+-Isrcs/kprintf
+-Isrcs/vga
+-Isrcs/keyboard

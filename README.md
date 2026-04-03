@@ -1,5 +1,14 @@
 //// FONCTIONNEMENT PRINCIPAL DU KERNEL ////
 
+
+Doc pour assembleur :
+https://www.gnu.org/software/grub/manual/multiboot/multiboot.html
+https://home.cs.colorado.edu/~main/cs1300-old/nasmdoc/html/nasmdoc6.html
+
+
+xorriso is needed for this project
+sudo dnf / apt install -y xorriso
+
 1. Lors du Makefile,
    - boot/boot.asm est assemble avec nasm
    - le noyau C (srcs/kernel/*.c) est compile avec gcc -m32 en freestanding
@@ -166,7 +175,7 @@ sti     ; enable interrupts
 
 [ attribut (8 bits) ][ caractère ASCII (8 bits) ]
 
-[ H ][ e ][ l ][ l ][ o ]
+[Attribut] [ H ] [Attribut] [ e ][ l ][ l ][ o ]
 [ attr,H ][ attr,e ][ attr,l ][ attr,l ][ attr,o ]
 
 Mémoire (0xB8000)

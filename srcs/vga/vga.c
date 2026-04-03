@@ -33,6 +33,8 @@ void vga_init(uint32_t video_address)
     g_vga.row = 0U;
     g_vga.col = 0U;
 
+    
+
     color_init(&g_color, VGA_FOREGROUND, VGA_BACKGROUND, VGA_BLINK);
 }
 
@@ -131,7 +133,7 @@ static void vga_newline(void)
 
 static void vga_putchar(char c)
 {
-    if (c == '\n') {
+    if (c == '\n'){
         vga_newline();
         vga_cursor_sync();
         return;
